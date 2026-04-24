@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(curl -s https://api.github.com/users/EliasGalindo0/repos?per_page=100)",
+      "Bash(curl:*)"
+    ]
+  }
+}
