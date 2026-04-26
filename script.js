@@ -10,11 +10,11 @@ window.addEventListener('scroll', () => {
    Typing animation
    ============================================= */
 const phrases = [
-  'Backend Systems',
-  'Financial Tech',
-  'Rust & Systems Programming',
-  'APIs & Microservices',
-  'High-Performance Software',
+  ' Backend Systems',
+  ' Financial Tech',
+  ' Rust & Systems Programming',
+  ' APIs & Microservices',
+  ' High-Performance Software',
 ];
 
 let phraseIndex = 0;
