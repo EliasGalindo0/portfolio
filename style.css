@@ -191,7 +191,7 @@ body::before {
   height: 1.6rem;
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 0.35em;
 }
 
 .typing-prefix { color: var(--text-dim); }
