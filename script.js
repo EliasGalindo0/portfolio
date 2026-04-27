@@ -56,7 +56,6 @@ type();
 /* =============================================
    Scroll reveal with Intersection Observer
    ============================================= */
-const revealEls = document.querySelectorAll(".reveal");
 const revealObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry, i) => {
@@ -79,7 +78,13 @@ const revealObserver = new IntersectionObserver(
   { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
 );
 
-revealEls.forEach((el) => revealObserver.observe(el));
+function observeReveals(root = document) {
+  root.querySelectorAll(".reveal").forEach((el) => {
+    if (!el.classList.contains("visible")) revealObserver.observe(el);
+  });
+}
+
+observeReveals();
 
 /* =============================================
    Skill bars: animate width when visible
@@ -137,4 +142,128 @@ document.querySelectorAll(".project-card").forEach((card) => {
     card.style.setProperty("--mx", x + "%");
     card.style.setProperty("--my", y + "%");
   });
+});
+
+/* =============================================
+   Projects: load featured repos from GitHub
+   ============================================= */
+const GITHUB_USER = "EliasGalindo0";
+
+// Add your next 3 important repos here (just the repo name).
+const FEATURED_REPOS = [
+  "ai-support-agent",
+  "financial-data-platform",
+  "MediSync",
+  "financial-report-rust",
+  "emailsenderapi",
+  "neuro-sales",
+];
+
+const LANGUAGE_BADGE_CLASS = new Map([
+  ["TypeScript", "badge-ts"],
+  ["JavaScript", "badge-js"],
+  ["Python", "badge-python"],
+  ["Rust", "badge-rust"],
+  ["Go", "badge-go"],
+  ["C#", "badge-csharp"],
+  ["C++", "badge-cpp"],
+  ["Dart", "badge-dart"],
+  ["PHP", "badge-php"],
+]);
+
+function esc(str) {
+  return String(str ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function titleFromRepoName(name) {
+  return name
+    .split("-")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function projectCard(repo) {
+  const lang = repo.language || "Project";
+  const badgeClass = LANGUAGE_BADGE_CLASS.get(lang) ?? "badge-js";
+  const title =
+    repo.name === repo.name?.toLowerCase()
+      ? titleFromRepoName(repo.name)
+      : repo.name;
+  const desc =
+    repo.description?.trim() ||
+    "Project repository on GitHub. See README for details, setup, and usage.";
+
+  const stars = Number(repo.stargazers_count || 0);
+  const footer =
+    stars > 0
+      ? `<span class="card-star">★ ${stars}</span>`
+      : `<span class="card-tag">${esc(lang)}</span>`;
+
+  return `
+    <article class="project-card reveal">
+      <div class="card-header">
+        <span class="badge ${esc(badgeClass)}">${esc(lang)}</span>
+        <a href="${esc(repo.html_url)}" target="_blank" rel="noopener" class="card-link" aria-label="View ${esc(repo.name)} on GitHub">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+        </a>
+      </div>
+      <h3 class="card-title">${esc(title)}</h3>
+      <p class="card-desc">${esc(desc)}</p>
+      <div class="card-footer">
+        ${footer}
+      </div>
+    </article>
+  `.trim();
+}
+
+async function fetchRepo(repoName) {
+  const res = await fetch(
+    `https://api.github.com/repos/${GITHUB_USER}/${repoName}`,
+    {
+      headers: { Accept: "application/vnd.github+json" },
+    },
+  );
+  if (!res.ok)
+    throw new Error(`Failed to fetch repo ${repoName}: ${res.status}`);
+  return await res.json();
+}
+
+async function renderFeaturedProjects() {
+  const grid = document.getElementById("projects-grid");
+  if (!grid) return;
+
+  const uniqueNames = Array.from(new Set(FEATURED_REPOS)).filter(Boolean);
+  if (uniqueNames.length === 0) return;
+
+  try {
+    const repos = await Promise.all(uniqueNames.map(fetchRepo));
+    grid.innerHTML = repos.map(projectCard).join("\n\n");
+
+    // Re-enable reveal animation for new nodes
+    observeReveals(grid);
+
+    // Re-enable glow tracking for new cards
+    grid.querySelectorAll(".project-card").forEach((card) => {
+      card.addEventListener("mousemove", (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        card.style.setProperty("--mx", x + "%");
+        card.style.setProperty("--my", y + "%");
+      });
+    });
+  } catch (e) {
+    // If GitHub is rate-limiting or offline, keep the static HTML.
+    console.warn(e);
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  renderFeaturedProjects();
 });
