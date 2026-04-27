@@ -1,0 +1,22 @@
+# OS / Editor
+.vscode/
+
+# Cursor / Claude / OpenClaude
+.cursor/
+*.openclaude
+.cursorrules
+
+# Env files
+.env
+.env.*
+
+# Node / tooling (in case you use npx/serve later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
