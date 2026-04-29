@@ -87,6 +87,7 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
 }
 
 .nav-logo {
@@ -99,6 +100,20 @@ body::before {
 .nav-links {
   display: flex;
   gap: 2rem;
+}
+
+.lang-toggle {
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.lang-toggle-label {
+  display: inline-block;
+  min-width: 56px;
+  text-align: center;
 }
 
 .nav-links a {

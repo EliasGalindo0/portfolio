@@ -11,23 +11,181 @@ window.addEventListener(
 );
 
 /* =============================================
+   i18n: PT-BR ↔ EN toggle
+   ============================================= */
+const I18N_STORAGE_KEY = "portfolio.lang";
+let currentLang = "en";
+
+const I18N = {
+  en: {
+    "doc.title": "Elias Galindo — Software Engineer",
+    "lang.toggle": "PT-BR",
+    "nav.about": "About",
+    "nav.skills": "Skills",
+    "nav.projects": "Projects",
+    "nav.contact": "Contact",
+    "hero.badge": "Available for opportunities",
+    "hero.title": "Software Engineer",
+    "hero.specializedIn": "Specialized in",
+    "hero.viewProjects": "View Projects",
+    "hero.scroll": "scroll",
+    "about.label": "About",
+    "about.title":
+      'Building reliable systems<br /><span class="accent">from Brazil to the world</span>',
+    "about.p1":
+      'I\'m a backend-focused Software Engineer passionate about systems programming and financial technology. With a strong foundation in low-level languages like <strong>Rust</strong> and <strong>C++</strong>, I build performant, reliable software that handles real business problems.',
+    "about.highlight.kicker": "Recent experience",
+    "about.highlight.title": "2+ years at a nationally recognized fintech",
+    "about.highlight.sub":
+      "Building backend systems with a strong focus on reliability, performance, and real-world financial workflows.",
+    "about.p2":
+      "From crafting APIs in <strong>C#</strong> and <strong>Node.js</strong> to building financial reporting tools in Rust and mobile experiences with <strong>Flutter</strong>, I enjoy working across the full depth of the stack — always prioritizing correctness, performance, and clean architecture.",
+    "about.p3":
+      "Currently open to backend, systems engineering, and fintech opportunities worldwide.",
+    "about.stats.langs": "Languages & Frameworks",
+    "about.stats.repos": "Public Repositories",
+    "about.stats.years": "Years of Experience",
+    "about.stats.based": "Based in Brazil",
+    "skills.label": "Skills",
+    "skills.title": "Technologies I work with",
+    "skills.group.systems": "Systems & Backend",
+    "skills.group.web": "Web & Frontend",
+    "skills.group.mobile": "Mobile & Scripting",
+    "projects.label": "Projects",
+    "projects.title": "Selected work",
+    "contact.label": "Contact",
+    "contact.title": "Open to opportunities",
+    "contact.text":
+      "I'm currently available for backend engineering, systems programming, and fintech roles. If you're building something interesting, let's talk.",
+    "contact.viewGithub": "View GitHub",
+    "footer.copy":
+      "© 2024 Elias Pires Abrão Galindo. Built with pure HTML, CSS & JS.",
+  },
+  "pt-BR": {
+    "doc.title": "Elias Galindo — Engenheiro de Software",
+    "lang.toggle": "EN",
+    "nav.about": "Sobre",
+    "nav.skills": "Skills",
+    "nav.projects": "Projetos",
+    "nav.contact": "Contato",
+    "hero.badge": "Disponível para oportunidades",
+    "hero.title": "Engenheiro de Software",
+    "hero.specializedIn": "Especializado em",
+    "hero.viewProjects": "Ver Projetos",
+    "hero.scroll": "rolar",
+    "about.label": "Sobre",
+    "about.title":
+      'Construindo sistemas confiáveis<br /><span class="accent">do Brasil para o mundo</span>',
+    "about.p1":
+      'Sou um Engenheiro de Software com foco em backend, apaixonado por programação de sistemas e tecnologia financeira. Com uma base forte em linguagens de baixo nível como <strong>Rust</strong> e <strong>C++</strong>, eu construo software performático e confiável para resolver problemas reais.',
+    "about.highlight.kicker": "Experiência recente",
+    "about.highlight.title": "2+ anos em uma fintech de reconhecimento nacional",
+    "about.highlight.sub":
+      "Construindo sistemas backend com foco em confiabilidade, performance e fluxos financeiros do mundo real.",
+    "about.p2":
+      "De APIs em <strong>C#</strong> e <strong>Node.js</strong> a ferramentas de relatórios financeiros em Rust e experiências mobile com <strong>Flutter</strong>, gosto de atuar em profundidade na stack — sempre priorizando correção, performance e arquitetura limpa.",
+    "about.p3":
+      "Atualmente aberto a oportunidades em backend, systems engineering e fintech no mundo todo.",
+    "about.stats.langs": "Linguagens & Frameworks",
+    "about.stats.repos": "Repositórios Públicos",
+    "about.stats.years": "Anos de Experiência",
+    "about.stats.based": "Baseado no Brasil",
+    "skills.label": "Skills",
+    "skills.title": "Tecnologias com as quais trabalho",
+    "skills.group.systems": "Sistemas & Backend",
+    "skills.group.web": "Web & Frontend",
+    "skills.group.mobile": "Mobile & Scripts",
+    "projects.label": "Projetos",
+    "projects.title": "Trabalhos em destaque",
+    "contact.label": "Contato",
+    "contact.title": "Aberto a oportunidades",
+    "contact.text":
+      "Atualmente estou disponível para vagas em backend, programação de sistemas e fintech. Se você está construindo algo interessante, vamos conversar.",
+    "contact.viewGithub": "Ver GitHub",
+    "footer.copy":
+      "© 2024 Elias Pires Abrão Galindo. Feito com HTML, CSS e JS puros.",
+  },
+};
+
+const TYPING_PHRASES = {
+  en: [
+    "Backend Systems",
+    "Financial Tech",
+    "Rust & Systems Programming",
+    "APIs & Microservices",
+    "High-Performance Software",
+    "Data Science",
+    "Machine Learning",
+    "Artificial Intelligence",
+  ],
+  "pt-BR": [
+    "Sistemas Backend",
+    "Tecnologia Financeira",
+    "Rust & Programação de Sistemas",
+    "APIs & Microservices",
+    "Software de Alta Performance",
+    "Ciência de Dados",
+    "Machine Learning",
+    "Inteligência Artificial",
+  ],
+};
+
+function getInitialLang() {
+  const saved = localStorage.getItem(I18N_STORAGE_KEY);
+  if (saved === "pt-BR" || saved === "en") return saved;
+  const navLang = navigator.language || "";
+  return navLang.toLowerCase().startsWith("pt") ? "pt-BR" : "en";
+}
+
+function applyI18n(lang) {
+  const dict = I18N[lang] ?? I18N.en;
+  currentLang = lang;
+
+  document.documentElement.lang = lang === "pt-BR" ? "pt-BR" : "en";
+
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.getAttribute("data-i18n");
+    if (!key) return;
+    const v = dict[key];
+    if (typeof v === "string") el.textContent = v;
+  });
+
+  document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+    const key = el.getAttribute("data-i18n-html");
+    if (!key) return;
+    const v = dict[key];
+    if (typeof v === "string") el.innerHTML = v;
+  });
+}
+
+function setLang(lang) {
+  const normalized = lang === "pt-BR" ? "pt-BR" : "en";
+  localStorage.setItem(I18N_STORAGE_KEY, normalized);
+  applyI18n(normalized);
+  setTypingLanguage(normalized);
+}
+
+/* =============================================
    Typing animation
    ============================================= */
-const phrases = [
-  "Backend Systems",
-  "Financial Tech",
-  "Rust & Systems Programming",
-  "APIs & Microservices",
-  "High-Performance Software",
-  "Data Science",
-  "Machine Learning",
-  "Artificial Intelligence",
-];
+let phrases = TYPING_PHRASES.en.slice();
 
 let phraseIndex = 0;
 let charIndex = 0;
 let isDeleting = false;
 const typedEl = document.getElementById("typed");
+
+let typingTimer = null;
+
+function setTypingLanguage(lang) {
+  phrases = (TYPING_PHRASES[lang] ?? TYPING_PHRASES.en).slice();
+  phraseIndex = 0;
+  charIndex = 0;
+  isDeleting = false;
+  if (typedEl) typedEl.textContent = "";
+  if (typingTimer) clearTimeout(typingTimer);
+// typing is initialized on DOMContentLoaded (after i18n is applied)
+}
 
 function type() {
   const current = phrases[phraseIndex];
@@ -48,7 +206,7 @@ function type() {
     delay = 400;
   }
 
-  setTimeout(type, delay);
+  typingTimer = setTimeout(type, delay);
 }
 
 type();
@@ -203,6 +361,73 @@ const FEATURED_OVERRIDES = {
   },
 };
 
+const FEATURED_OVERRIDES_I18N = {
+  en: {
+    PAICS: {
+      title: "PAICS",
+      description:
+        "Production-grade veterinary reporting system that uses LLMs to draft ultrasound and X-ray reports. Full platform with auth, dashboards, FastAPI + Next.js, MongoDB, and a knowledge base + vector DB (ChromaDB) to support consistent reporting.",
+      tags: ["In production", "LLM", "Vet Imaging", "FastAPI", "Next.js"],
+    },
+    "real-time-analytics-engine": {
+      title: "Real-time Analytics Engine",
+      description:
+        "Real-time analytics pipeline focused on low-latency event processing, aggregation, and operational observability. Designed to handle high-throughput workloads with correctness and performance in mind.",
+      tags: ["Real-time", "Analytics", "Performance", "Backend"],
+    },
+    "ai-support-agent": {
+      title: "AI Support Agent",
+      description:
+        "AI-powered support agent showcasing tool-driven workflows, structured prompting, and automation-oriented architecture. Built to be extended with integrations and domain knowledge.",
+      tags: ["AI", "Agents", "Automation"],
+    },
+    "financial-data-platform": {
+      title: "Financial Data Platform",
+      description:
+        "FinTech-oriented platform project centered on performance, correctness, and maintainability for financial data processing workflows and reporting pipelines.",
+      tags: ["FinTech", "Data", "Systems"],
+    },
+    "crm-ze-vip": {
+      title: "CRM Zë VIP",
+      description:
+        "Private SaaS CRM used in production at my automotive detailing business. Built to manage customers, operations, and the full workflow end-to-end. Repo is private due to business data and product strategy.",
+      tags: ["In production", "SaaS", "Private"],
+    },
+  },
+  "pt-BR": {
+    PAICS: {
+      title: "PAICS",
+      description:
+        "Sistema de laudos veterinários em produção que usa LLM para apoiar a geração de laudos de ultrassom e raios-X. Plataforma completa com autenticação, dashboards, FastAPI + Next.js, MongoDB, base de conhecimento e vector DB (ChromaDB) para consistência e reuso de casos.",
+      tags: ["Em produção", "LLM", "Imagem Vet", "FastAPI", "Next.js"],
+    },
+    "real-time-analytics-engine": {
+      title: "Real-time Analytics Engine",
+      description:
+        "Pipeline de analytics em tempo real com foco em baixa latência para processamento de eventos, agregações e observabilidade. Pensado para alto throughput com performance e correção.",
+      tags: ["Tempo real", "Analytics", "Performance", "Backend"],
+    },
+    "ai-support-agent": {
+      title: "AI Support Agent",
+      description:
+        "Agente de suporte com IA mostrando workflows orientados a ferramentas, prompting estruturado e arquitetura focada em automação e extensibilidade.",
+      tags: ["IA", "Agentes", "Automação"],
+    },
+    "financial-data-platform": {
+      title: "Financial Data Platform",
+      description:
+        "Projeto de plataforma voltada a FinTech com foco em performance, correção e manutenibilidade para fluxos de processamento de dados e relatórios.",
+      tags: ["FinTech", "Dados", "Sistemas"],
+    },
+    "crm-ze-vip": {
+      title: "CRM Zë VIP",
+      description:
+        "SaaS CRM privado em produção usado na minha estética automotiva. Construído para gerenciar clientes, operação e workflow ponta a ponta. O repositório é privado por conter estratégia de produto e dados do negócio.",
+      tags: ["Em produção", "SaaS", "Privado"],
+    },
+  },
+};
+
 const LANGUAGE_BADGE_CLASS = new Map([
   ["TypeScript", "badge-ts"],
   ["JavaScript", "badge-js"],
@@ -237,18 +462,30 @@ function projectCard(repo) {
   const isHighlight = Boolean(override?.highlight);
   const lang = repo.language || "Project";
   const badgeClass = LANGUAGE_BADGE_CLASS.get(lang) ?? "badge-js";
-  const title = override?.title
-    ? override.title
+  const localized = FEATURED_OVERRIDES_I18N[currentLang]?.[repo.name] ?? null;
+  const title = localized?.title
+    ? localized.title
+    : override?.title
+      ? override.title
     : repo.name === repo.name?.toLowerCase()
       ? titleFromRepoName(repo.name)
       : repo.name;
-  const desc = override?.description
-    ? override.description
-    : repo.description?.trim() ||
-      "Project repository on GitHub. See README for details, setup, and usage.";
+  const fallbackDesc =
+    currentLang === "pt-BR"
+      ? "Repositório do projeto no GitHub. Veja o README para detalhes, setup e uso."
+      : "Project repository on GitHub. See README for details, setup, and usage.";
+  const desc = localized?.description
+    ? localized.description
+    : override?.description
+      ? override.description
+      : repo.description?.trim() || fallbackDesc;
 
   const stars = Number(repo.stargazers_count || 0);
-  const overrideTags = Array.isArray(override?.tags) ? override.tags : null;
+  const overrideTags = Array.isArray(localized?.tags)
+    ? localized.tags
+    : Array.isArray(override?.tags)
+      ? override.tags
+      : null;
   const footer = overrideTags?.length
     ? overrideTags.map((t) => `<span class="card-tag">${esc(t)}</span>`).join("")
     : stars > 0
@@ -336,5 +573,18 @@ async function renderFeaturedProjects() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  // Init language toggle early
+  const initialLang = getInitialLang();
+  applyI18n(initialLang);
+  setTypingLanguage(initialLang);
+
+  const toggle = document.getElementById("lang-toggle");
+  if (toggle) {
+    toggle.addEventListener("click", () => {
+      const current = localStorage.getItem(I18N_STORAGE_KEY) || initialLang;
+      setLang(current === "pt-BR" ? "en" : "pt-BR");
+    });
+  }
+
   renderFeaturedProjects();
 });
