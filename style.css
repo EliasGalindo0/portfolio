@@ -415,6 +415,55 @@ body::before {
   line-height: 1.75;
 }
 
+.about-highlight {
+  background: var(--surface);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  margin: 1.25rem 0 1.5rem;
+  box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.08), 0 18px 60px rgba(0, 212, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.about-highlight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,212,255,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.about-highlight-kicker {
+  display: inline-flex;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.about-highlight-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin-bottom: 0.35rem;
+  position: relative;
+  z-index: 1;
+}
+
+.about-highlight-sub {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  line-height: 1.7;
+  position: relative;
+  z-index: 1;
+}
+
 .about-text p:last-child { margin-bottom: 0; }
 .about-text strong { color: var(--text); font-weight: 600; }
 
