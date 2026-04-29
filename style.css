@@ -545,6 +545,7 @@ body::before {
 .badge-node    { color: #86efac; background: rgba(134,239,172,.12);border-color: rgba(134,239,172,.3); }
 .badge-php     { color: #818cf8; background: rgba(129,140,248,.12);border-color: rgba(129,140,248,.3); }
 .badge-ionic   { color: #38bdf8; background: rgba(56,189,248,.12); border-color: rgba(56,189,248,.3); }
+.badge-featured { color: #00d4ff; background: rgba(0,212,255,.10); border-color: rgba(0,212,255,.35); }
 
 /* =============================================
    Projects
@@ -588,12 +589,27 @@ body::before {
 
 .project-card:hover::before { opacity: 1; }
 
+.project-card--highlight {
+  border-color: rgba(0, 212, 255, 0.45);
+  box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.14), 0 18px 60px rgba(0, 212, 255, 0.10);
+}
+
+.project-card--highlight::before {
+  opacity: 1;
+  background: linear-gradient(135deg, rgba(0,212,255,0.08) 0%, rgba(139, 92, 246, 0.05) 55%, transparent 80%);
+}
+
+.project-card--highlight:hover {
+  box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.22), 0 22px 70px rgba(0, 212, 255, 0.14);
+}
+
 .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: relative;
   z-index: 1;
+  gap: 10px;
 }
 
 .card-link {

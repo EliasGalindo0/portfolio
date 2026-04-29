@@ -151,13 +151,57 @@ const GITHUB_USER = "EliasGalindo0";
 
 // Add your next 3 important repos here (just the repo name).
 const FEATURED_REPOS = [
+  "PAICS",
+  "real-time-analytics-engine",
   "ai-support-agent",
   "financial-data-platform",
+  "crm-ze-vip",
   "MediSync",
   "financial-report-rust",
   "emailsenderapi",
   "neuro-sales",
 ];
+
+// Per-repo overrides (title/description/tags/highlight).
+// Keep this small and focused: it’s your “curated” project list.
+const FEATURED_OVERRIDES = {
+  PAICS: {
+    title: "PAICS",
+    description:
+      "Production-grade veterinary reporting system that uses LLMs to draft ultrasound and X-ray reports. Full platform with auth, dashboards, FastAPI + Next.js, MongoDB, and a knowledge base + vector DB (ChromaDB) to support consistent reporting.",
+    tags: ["In production", "LLM", "Vet Imaging", "FastAPI", "Next.js"],
+    highlight: true,
+  },
+  "real-time-analytics-engine": {
+    title: "Real-time Analytics Engine",
+    description:
+      "Real-time analytics pipeline focused on low-latency event processing, aggregation, and operational observability. Designed to handle high-throughput workloads with correctness and performance in mind.",
+    tags: ["Real-time", "Analytics", "Performance", "Backend"],
+    highlight: true,
+  },
+  "ai-support-agent": {
+    title: "AI Support Agent",
+    description:
+      "AI-powered support agent showcasing tool-driven workflows, structured prompting, and automation-oriented architecture. Built to be extended with integrations and domain knowledge.",
+    tags: ["AI", "Agents", "Automation"],
+    highlight: true,
+  },
+  "financial-data-platform": {
+    title: "Financial Data Platform",
+    description:
+      "FinTech-oriented platform project centered on performance, correctness, and maintainability for financial data processing workflows and reporting pipelines.",
+    tags: ["FinTech", "Data", "Systems"],
+    highlight: true,
+  },
+  "crm-ze-vip": {
+    title: "CRM Zë VIP",
+    description:
+      "Private SaaS CRM used in production at my automotive detailing business. Built to manage customers, operations, and the full workflow end-to-end. Repo is private due to business data and product strategy.",
+    tags: ["In production", "SaaS", "Private"],
+    highlight: true,
+    private: true,
+  },
+};
 
 const LANGUAGE_BADGE_CLASS = new Map([
   ["TypeScript", "badge-ts"],
@@ -189,29 +233,40 @@ function titleFromRepoName(name) {
 }
 
 function projectCard(repo) {
+  const override = FEATURED_OVERRIDES[repo.name] ?? null;
+  const isHighlight = Boolean(override?.highlight);
   const lang = repo.language || "Project";
   const badgeClass = LANGUAGE_BADGE_CLASS.get(lang) ?? "badge-js";
-  const title =
-    repo.name === repo.name?.toLowerCase()
+  const title = override?.title
+    ? override.title
+    : repo.name === repo.name?.toLowerCase()
       ? titleFromRepoName(repo.name)
       : repo.name;
-  const desc =
-    repo.description?.trim() ||
-    "Project repository on GitHub. See README for details, setup, and usage.";
+  const desc = override?.description
+    ? override.description
+    : repo.description?.trim() ||
+      "Project repository on GitHub. See README for details, setup, and usage.";
 
   const stars = Number(repo.stargazers_count || 0);
-  const footer =
-    stars > 0
+  const overrideTags = Array.isArray(override?.tags) ? override.tags : null;
+  const footer = overrideTags?.length
+    ? overrideTags.map((t) => `<span class="card-tag">${esc(t)}</span>`).join("")
+    : stars > 0
       ? `<span class="card-star">★ ${stars}</span>`
       : `<span class="card-tag">${esc(lang)}</span>`;
 
   return `
-    <article class="project-card reveal">
+    <article class="project-card reveal${isHighlight ? " project-card--highlight" : ""}">
       <div class="card-header">
         <span class="badge ${esc(badgeClass)}">${esc(lang)}</span>
-        <a href="${esc(repo.html_url)}" target="_blank" rel="noopener" class="card-link" aria-label="View ${esc(repo.name)} on GitHub">
+        ${isHighlight ? `<span class="badge badge-featured">Featured</span>` : ""}
+        ${
+          repo.html_url
+            ? `<a href="${esc(repo.html_url)}" target="_blank" rel="noopener" class="card-link" aria-label="View ${esc(repo.name)} on GitHub">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
-        </a>
+        </a>`
+            : ""
+        }
       </div>
       <h3 class="card-title">${esc(title)}</h3>
       <p class="card-desc">${esc(desc)}</p>
@@ -234,6 +289,16 @@ async function fetchRepo(repoName) {
   return await res.json();
 }
 
+function syntheticPrivateRepo(name) {
+  return {
+    name,
+    html_url: null,
+    language: "SaaS",
+    description: null,
+    stargazers_count: 0,
+  };
+}
+
 async function renderFeaturedProjects() {
   const grid = document.getElementById("projects-grid");
   if (!grid) return;
@@ -242,7 +307,13 @@ async function renderFeaturedProjects() {
   if (uniqueNames.length === 0) return;
 
   try {
-    const repos = await Promise.all(uniqueNames.map(fetchRepo));
+    const repos = await Promise.all(
+      uniqueNames.map(async (name) => {
+        const override = FEATURED_OVERRIDES[name] ?? null;
+        if (override?.private) return syntheticPrivateRepo(name);
+        return await fetchRepo(name);
+      }),
+    );
     grid.innerHTML = repos.map(projectCard).join("\n\n");
 
     // Re-enable reveal animation for new nodes
